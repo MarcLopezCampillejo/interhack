@@ -1,0 +1,27 @@
+metric,value,count
+categoria_logistica,Unidad horeca secundaria,543
+categoria_logistica,Caja horeca secundaria,214
+categoria_logistica,Estándar,168
+categoria_logistica,Caja bebida pesada,163
+categoria_logistica,Botella frágil,152
+categoria_logistica,Caja estándar,115
+categoria_logistica,Unidad estándar,93
+categoria_logistica,Pack ligero,20
+categoria_logistica,Barril pesado,17
+categoria_logistica,Gas / industrial,2
+categoria_logistica,Display / tira promocional,1
+categoria_logistica,Caja retornable,1
+prioridad_acceso,Baja,1027
+prioridad_acceso,Media,442
+prioridad_acceso,Alta,20
+familia_inferida,Alimentación,520
+familia_inferida,Higiene/menaje,254
+familia_inferida,Licor,195
+familia_inferida,Refresco/zumo,113
+familia_inferida,Vino,105
+familia_inferida,Otro,86
+familia_inferida,Agua/envase,81
+familia_inferida,Café,48
+familia_inferida,Cerveza,37
+familia_inferida,Lácteo,33
+familia_inferida,Retornable/envase,17

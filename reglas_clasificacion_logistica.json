@@ -1,0 +1,45 @@
+{
+  "description": "Reglas heurísticas para convertir referencias de producto en comportamiento logístico del camión.",
+  "rules": [
+    {
+      "condition": "Tipo == BRL o Producto empieza por BRL",
+      "category": "Barril pesado",
+      "loading": "lateral accesible, parte baja, no apilable"
+    },
+    {
+      "condition": "Tipo == TB o Producto empieza por TB",
+      "category": "Gas / industrial",
+      "loading": "zona segura lateral"
+    },
+    {
+      "condition": "Tipo == BOT",
+      "category": "Botella frágil",
+      "loading": "zona protegida y estable"
+    },
+    {
+      "condition": "Tipo == CAJ y Retornable == Sí",
+      "category": "Caja retornable",
+      "loading": "zona accesible + retorno dinámico"
+    },
+    {
+      "condition": "Tipo == CAJ y familia Agua/Refresco",
+      "category": "Caja bebida pesada",
+      "loading": "parte baja / zona estable"
+    },
+    {
+      "condition": "Tipo == PAK",
+      "category": "Pack ligero",
+      "loading": "zona media/superior"
+    },
+    {
+      "condition": "Tipo == UN",
+      "category": "Unidad estándar o horeca secundaria",
+      "loading": "zona flexible"
+    },
+    {
+      "condition": "Retornable == Sí",
+      "category": "mantiene o sube prioridad",
+      "loading": "reserva espacio dinámico de retorno"
+    }
+  ]
+}
