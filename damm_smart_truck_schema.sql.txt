@@ -1,0 +1,460 @@
+
+-- =====================================================
+-- DAMM SMART TRUCK
+-- LOGISTICS-ORIENTED DATABASE SCHEMA
+-- =====================================================
+
+PRAGMA foreign_keys = ON;
+
+-- =====================================================
+-- CLIENTS
+-- =====================================================
+
+CREATE TABLE clients (
+
+    client_id VARCHAR(50) PRIMARY KEY,
+
+    name TEXT NOT NULL,
+
+    address TEXT,
+
+    zone VARCHAR(50),
+
+    latitude FLOAT,
+    longitude FLOAT,
+
+    client_priority INTEGER DEFAULT 1,
+
+    estimated_unload_time INTEGER,
+
+    has_returns BOOLEAN DEFAULT 1,
+
+    difficult_access BOOLEAN DEFAULT 0,
+
+    requires_manual_unload BOOLEAN DEFAULT 0
+);
+
+-- =====================================================
+-- CLIENT TIME WINDOWS
+-- =====================================================
+
+CREATE TABLE client_time_windows (
+
+    time_window_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    client_id VARCHAR(50),
+
+    start_minutes INTEGER,
+
+    end_minutes INTEGER,
+
+    time_priority INTEGER,
+
+    FOREIGN KEY(client_id)
+        REFERENCES clients(client_id)
+);
+
+-- =====================================================
+-- VEHICLES
+-- =====================================================
+
+CREATE TABLE vehicles (
+
+    vehicle_id VARCHAR(50) PRIMARY KEY,
+
+    vehicle_type VARCHAR(50),
+
+    capacity_slots FLOAT,
+
+    capacity_weight FLOAT,
+
+    capacity_volume FLOAT,
+
+    lateral_access BOOLEAN
+);
+
+-- =====================================================
+-- ROUTES
+-- =====================================================
+
+CREATE TABLE routes (
+
+    route_id VARCHAR(50) PRIMARY KEY,
+
+    vehicle_id VARCHAR(50),
+
+    driver_id VARCHAR(50),
+
+    route_date DATE,
+
+    main_zone VARCHAR(50),
+
+    FOREIGN KEY(vehicle_id)
+        REFERENCES vehicles(vehicle_id)
+);
+
+-- =====================================================
+-- ROUTE STOPS
+-- =====================================================
+
+CREATE TABLE route_stops (
+
+    stop_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    route_id VARCHAR(50),
+
+    client_id VARCHAR(50),
+
+    visit_order INTEGER,
+
+    eta_minutes INTEGER,
+
+    score_time_window FLOAT,
+
+    score_zone FLOAT,
+
+    score_priority FLOAT,
+
+    score_proximity FLOAT,
+
+    estimated_client_volume FLOAT,
+
+    estimated_space_delta FLOAT,
+
+    estimated_return_slots FLOAT,
+
+    stop_status VARCHAR(20),
+
+    FOREIGN KEY(route_id)
+        REFERENCES routes(route_id),
+
+    FOREIGN KEY(client_id)
+        REFERENCES clients(client_id)
+);
+
+-- =====================================================
+-- ORDERS
+-- =====================================================
+
+CREATE TABLE orders (
+
+    order_id VARCHAR(50) PRIMARY KEY,
+
+    client_id VARCHAR(50),
+
+    requested_delivery_date DATE,
+
+    priority_level INTEGER,
+
+    total_weight FLOAT,
+
+    total_volume FLOAT,
+
+    total_slots FLOAT,
+
+    total_products INTEGER,
+
+    estimated_returns FLOAT,
+
+    order_status VARCHAR(20),
+
+    FOREIGN KEY(client_id)
+        REFERENCES clients(client_id)
+);
+
+-- =====================================================
+-- PRODUCTS
+-- =====================================================
+
+CREATE TABLE products (
+
+    product_id VARCHAR(50) PRIMARY KEY,
+
+    product_name TEXT,
+
+    unit_type VARCHAR(20),
+
+    unit_weight FLOAT,
+
+    unit_volume FLOAT,
+
+    returnable BOOLEAN,
+
+    visual_category VARCHAR(50),
+
+    color_tag VARCHAR(20),
+
+    icon VARCHAR(50)
+);
+
+-- =====================================================
+-- PRODUCT FEATURES
+-- =====================================================
+
+CREATE TABLE product_features (
+
+    product_id VARCHAR(50) PRIMARY KEY,
+
+    is_fragile INTEGER DEFAULT 0,
+
+    is_heavy INTEGER DEFAULT 0,
+
+    is_stackable INTEGER DEFAULT 0,
+
+    requires_lateral_access INTEGER DEFAULT 0,
+
+    is_barrel INTEGER DEFAULT 0,
+
+    is_bottle INTEGER DEFAULT 0,
+
+    is_box INTEGER DEFAULT 0,
+
+    is_gas INTEGER DEFAULT 0,
+
+    dynamic_return INTEGER DEFAULT 0,
+
+    loading_priority INTEGER DEFAULT 0,
+
+    unloading_priority INTEGER DEFAULT 0,
+
+    FOREIGN KEY(product_id)
+        REFERENCES products(product_id)
+);
+
+-- =====================================================
+-- ORDER ITEMS
+-- =====================================================
+
+CREATE TABLE order_items (
+
+    order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    order_id VARCHAR(50),
+
+    product_id VARCHAR(50),
+
+    quantity INTEGER,
+
+    unit_weight FLOAT,
+
+    unit_volume FLOAT,
+
+    total_weight FLOAT,
+
+    total_volume FLOAT,
+
+    estimated_slots FLOAT,
+
+    requires_lateral_access BOOLEAN,
+
+    loading_priority INTEGER,
+
+    FOREIGN KEY(order_id)
+        REFERENCES orders(order_id),
+
+    FOREIGN KEY(product_id)
+        REFERENCES products(product_id)
+);
+
+-- =====================================================
+-- LOADS
+-- =====================================================
+
+CREATE TABLE loads (
+
+    load_id VARCHAR(50) PRIMARY KEY,
+
+    route_id VARCHAR(50),
+
+    vehicle_id VARCHAR(50),
+
+    load_date DATE,
+
+    total_weight FLOAT,
+
+    total_volume FLOAT,
+
+    total_slots FLOAT,
+
+    estimated_returns FLOAT,
+
+    optimization_score FLOAT,
+
+    load_status VARCHAR(20),
+
+    FOREIGN KEY(route_id)
+        REFERENCES routes(route_id),
+
+    FOREIGN KEY(vehicle_id)
+        REFERENCES vehicles(vehicle_id)
+);
+
+-- =====================================================
+-- LOAD ASSIGNMENTS
+-- =====================================================
+
+CREATE TABLE load_assignments (
+
+    assignment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    load_id VARCHAR(50),
+
+    order_id VARCHAR(50),
+
+    order_item_id INTEGER,
+
+    assigned_quantity INTEGER,
+
+    assigned_weight FLOAT,
+
+    assigned_volume FLOAT,
+
+    assigned_slots FLOAT,
+
+    delivery_priority INTEGER,
+
+    unloading_sequence INTEGER,
+
+    FOREIGN KEY(load_id)
+        REFERENCES loads(load_id),
+
+    FOREIGN KEY(order_id)
+        REFERENCES orders(order_id),
+
+    FOREIGN KEY(order_item_id)
+        REFERENCES order_items(order_item_id)
+);
+
+-- =====================================================
+-- PALLETS
+-- =====================================================
+
+CREATE TABLE pallets (
+
+    pallet_id VARCHAR(50) PRIMARY KEY,
+
+    load_id VARCHAR(50),
+
+    pallet_label VARCHAR(50),
+
+    unload_priority INTEGER,
+
+    accessible_lateral BOOLEAN,
+
+    total_weight FLOAT,
+
+    total_volume FLOAT,
+
+    estimated_returns FLOAT,
+
+    color_tag VARCHAR(20),
+
+    is_return_pallet BOOLEAN DEFAULT 0,
+
+    FOREIGN KEY(load_id)
+        REFERENCES loads(load_id)
+);
+
+-- =====================================================
+-- PALLET CONTENT
+-- =====================================================
+
+CREATE TABLE pallet_content (
+
+    pallet_content_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    pallet_id VARCHAR(50),
+
+    assignment_id INTEGER,
+
+    order_id VARCHAR(50),
+
+    product_id VARCHAR(50),
+
+    quantity INTEGER,
+
+    client_id VARCHAR(50),
+
+    visit_order INTEGER,
+
+    FOREIGN KEY(pallet_id)
+        REFERENCES pallets(pallet_id),
+
+    FOREIGN KEY(assignment_id)
+        REFERENCES load_assignments(assignment_id),
+
+    FOREIGN KEY(order_id)
+        REFERENCES orders(order_id),
+
+    FOREIGN KEY(product_id)
+        REFERENCES products(product_id),
+
+    FOREIGN KEY(client_id)
+        REFERENCES clients(client_id)
+);
+
+-- =====================================================
+-- TRUCK SLOTS
+-- =====================================================
+
+CREATE TABLE truck_slots (
+
+    slot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    route_id VARCHAR(50),
+
+    slot_number INTEGER,
+
+    depth_level INTEGER,
+
+    side_access BOOLEAN,
+
+    pallet_id VARCHAR(50),
+
+    extraction_priority INTEGER,
+
+    occupied BOOLEAN,
+
+    FOREIGN KEY(route_id)
+        REFERENCES routes(route_id),
+
+    FOREIGN KEY(pallet_id)
+        REFERENCES pallets(pallet_id)
+);
+
+-- =====================================================
+-- TRUCK STATE SIMULATION
+-- =====================================================
+
+CREATE TABLE truck_state (
+
+    state_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    route_id VARCHAR(50),
+
+    stop_order INTEGER,
+
+    client_id VARCHAR(50),
+
+    current_weight FLOAT,
+
+    current_volume FLOAT,
+
+    occupied_slots FLOAT,
+
+    freed_slots FLOAT,
+
+    collected_returns FLOAT,
+
+    space_delta FLOAT,
+
+    saturation_risk FLOAT,
+
+    simulation_timestamp INTEGER,
+
+    FOREIGN KEY(route_id)
+        REFERENCES routes(route_id),
+
+    FOREIGN KEY(client_id)
+        REFERENCES clients(client_id)
+);
