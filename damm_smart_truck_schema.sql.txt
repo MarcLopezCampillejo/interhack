@@ -32,7 +32,7 @@ CREATE TABLE clients (
     difficult_access BOOLEAN DEFAULT 0,
 
     requires_manual_unload BOOLEAN DEFAULT 0
-);
+);  
 
 -- =====================================================
 -- CLIENT TIME WINDOWS
